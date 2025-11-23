@@ -11,6 +11,18 @@ local function copilot_use_response_api(opts)
   return type(model) == "string" and model:match("gpt%-5%-codex") ~= nil
 end
 
+local function detect_codex_auth_method()
+  local env_value = os.getenv("CODEX_ACP_AUTH_METHOD")
+  if env_value ~= nil and env_value ~= "" then return env_value end
+
+  local has_api_key = os.getenv("OPENAI_API_KEY")
+  if not has_api_key or has_api_key == "" then return "chatgpt" end
+
+  return nil
+end
+
+local codex_auth_method = detect_codex_auth_method()
+
 ---@class avante.file_selector.IParams
 ---@field public title      string
 ---@field public filepaths  string[]
@@ -275,6 +287,7 @@ M._defaults = {
         PATH = os.getenv("PATH"),
         OPENAI_API_KEY = os.getenv("OPENAI_API_KEY"),
       },
+      auth_method = codex_auth_method,
     },
     ["opencode"] = {
       command = "opencode",

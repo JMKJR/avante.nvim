@@ -181,24 +181,16 @@ For building binary if you wish to build from source, then `cargo` is required. 
     -- this file can contain specific instructions for your project
     instructions_file = "avante.md",
     -- for example
-    provider = "claude",
-    providers = {
-      claude = {
-        endpoint = "https://api.anthropic.com",
-        model = "claude-sonnet-4-20250514",
-        timeout = 30000, -- Timeout in milliseconds
-          extra_request_body = {
-            temperature = 0.75,
-            max_tokens = 20480,
-          },
-      },
-      moonshot = {
-        endpoint = "https://api.moonshot.ai/v1",
-        model = "kimi-k2-0711-preview",
-        timeout = 30000, -- Timeout in milliseconds
-        extra_request_body = {
-          temperature = 0.75,
-          max_tokens = 32768,
+    provider = "codex", -- points at our ACP provider block below
+    acp_providers = {
+      ["codex"] = {
+        command = "codex-acp",
+        env = {
+          NODE_NO_WARNINGS = "1",
+          HOME = os.getenv("HOME"),
+          PATH = os.getenv("PATH"),
+          --- `OPENAI_API_KEY` is optional; leave it unset if you want to rely on OAuth.
+          OPENAI_API_KEY = os.getenv("OPENAI_API_KEY"),
         },
       },
     },
@@ -1259,11 +1251,14 @@ ACP providers are configured in the `acp_providers` section of your configuratio
         NODE_NO_WARNINGS = "1",
         OPENAI_API_KEY = os.getenv("OPENAI_API_KEY"),
       },
+      auth_method = os.getenv("CODEX_ACP_AUTH_METHOD"),
     },
   },
   -- other configuration options...
 }
 ```
+
+For usage-based billing stick with `OPENAI_API_KEY`. If you prefer OAuth, run `codex login` (and, if prompted, `codex mcp login codex`) to finish the browser-based sign-in, then remove the `OPENAI_API_KEY` export. When the API key is absent Avante will automatically ask Codex to use the `chatgpt` OAuth auth method, so no extra configuration is required. You can still force a specific method (for example `chatgpt` or `openai-api-key`) by exporting `CODEX_ACP_AUTH_METHOD`.
 
 ### Prerequisites
 
